@@ -30,5 +30,5 @@ development you can remove it from the package.json file:
     "lint": "next lint"
   }
 }
-'''
+
 
