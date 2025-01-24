@@ -21,7 +21,7 @@ the sqlscript.js that populates the database from the data.json file.
 The sqlscript.js is always run when you use command 'npm run dev'. To prevent it from running in
 development you can remove it from the package.json file: 
 
-'''
+'''json
 "scripts": {
     "dev": "node pages/database/sqlscript.js && next dev --turbopack",
     "build": "next build",
