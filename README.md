@@ -1,6 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
 
 ## Getting Started
+First you need to download the project: 
+```bash
+git clone 
+```
 You need to install sqlite3 and sqlite before you run the project:
 ```bash
 npm install sqlite3
