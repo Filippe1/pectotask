@@ -3,7 +3,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## Getting Started
 First you need to download the project: 
 ```bash
-git clone 
+git clone https://github.com/Filippe1/pectotask.git
 ```
 You need to install sqlite3 and sqlite before you run the project:
 ```bash
