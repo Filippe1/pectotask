@@ -14,36 +14,60 @@ export default async function handler(req, res) {
 
   switch (req.method) {
     case 'GET': {
-      const words = await db.all('SELECT * FROM rustofin');
-      res.status(200).json(words);
+      try {
+        const words = await db.all('SELECT * FROM rustofin');
+        res.status(200).json(words);
+      } catch (error) {
+        res.status(500).json({ error: 'Database query failed' });
+      }
       break;
     }
+
     case 'POST': {
-      const { word, translation, example } = req.body;
-      if (!word || !translation || !example) {
-        res.status(400).json({ error: 'Missing fields in request' });
+      const { id, wordFirstLang, sentenceFirstLang, wordSecondLang, sentenceSecondLang } = req.body;
+
+      if (!id || !wordFirstLang || !sentenceFirstLang || !wordSecondLang || !sentenceSecondLang) {
+        res.status(400).json({ error: 'All fields are required' });
         return;
       }
-      const result = await db.run(
-        'INSERT INTO rustofin (word, translation, example) VALUES (?, ?, ?)',
-        [word, translation, example]
-      );
-      res.status(201).json({ id: result.lastID });
+
+      try {
+        await db.run(
+          `INSERT INTO rustofin (id, wordFirstLang, sentenceFirstLang, wordSecondLang, sentenceSecondLang) 
+           VALUES (?, ?, ?, ?, ?)`,
+          [id, wordFirstLang.trim(), sentenceFirstLang.trim(), wordSecondLang.trim(), sentenceSecondLang.trim()]
+        );
+
+        res.status(201).json({ success: true, id });
+      } catch (error) {
+        res.status(500).json({ error: 'Failed to insert data' });
+      }
       break;
     }
+
     case 'PUT': {
-      const { id, word, translation, example } = req.body;
-      if (!id || !word || !translation || !example) {
-        res.status(400).json({ error: 'Missing fields in request' });
+      const { id, wordFirstLang, sentenceFirstLang, wordSecondLang, sentenceSecondLang } = req.body;
+
+      if (!id) {
+        res.status(400).json({ error: 'ID is required' });
         return;
       }
-      await db.run(
-        'UPDATE rustofin SET word = ?, translation = ?, example = ? WHERE id = ?',
-        [word, translation, example, id]
-      );
-      res.status(200).json({ success: true });
+
+      try {
+        await db.run(
+          `UPDATE rustofin 
+           SET wordFirstLang = ?, sentenceFirstLang = ?, wordSecondLang = ?, sentenceSecondLang = ? 
+           WHERE id = ?`,
+          [wordFirstLang.trim(), sentenceFirstLang.trim(), wordSecondLang.trim(), sentenceSecondLang.trim(), id]
+        );
+
+        res.status(200).json({ success: true });
+      } catch (error) {
+        res.status(500).json({ error: 'Failed to update data' });
+      }
       break;
     }
+
     default:
       res.status(405).json({ error: 'Method not allowed' });
   }

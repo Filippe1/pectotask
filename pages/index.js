@@ -18,9 +18,9 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const handleEditClick = (id, word, translation, example) => {
+  const handleEditClick = (id, wordFirstLang, sentenceFirstLang, wordSecondLang, sentenceSecondLang) => {
     setEditingId(id);
-    setEditedRow({ word, translation, example });
+    setEditedRow({ wordFirstLang, sentenceFirstLang, wordSecondLang, sentenceSecondLang });
   };
 
   const handleInputChange = (field, value) => {
@@ -28,17 +28,13 @@ export default function Home() {
   };
 
   const handleSaveClick = async (id) => {
-    // Update entry in the database
     const response = await fetch('/api/rustofin', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, ...editedRow }),
     });
 
     if (response.ok) {
-      // Update the frontend state with new data
       setData((prevData) =>
         prevData.map((item) =>
           item.id === id ? { ...item, ...editedRow } : item
@@ -52,9 +48,8 @@ export default function Home() {
       );
 
       setEditingId(null); // Exit editing mode
-      setSuccessMessage('Changes saved successfully!'); // Set success message
+      setSuccessMessage('Changes saved successfully!');
 
-      // Clear the message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } else {
       console.error('Failed to save changes.');
@@ -65,12 +60,12 @@ export default function Home() {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
 
-    // Filter the data based on the search term
     setFilteredData(
       data.filter((item) =>
-        item.word.toLowerCase().includes(term) ||
-        item.translation.toLowerCase().includes(term) ||
-        item.example.toLowerCase().includes(term)
+        item.wordFirstLang.toLowerCase().includes(term) ||
+        item.sentenceFirstLang.toLowerCase().includes(term) ||
+        item.wordSecondLang.toLowerCase().includes(term) ||
+        item.sentenceSecondLang.toLowerCase().includes(term)
       )
     );
   };
@@ -115,9 +110,10 @@ export default function Home() {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Word</th>
-            <th>Translation</th>
-            <th>Example</th>
+            <th>Word (First Lang)</th>
+            <th>Sentence (First Lang)</th>
+            <th>Word (Second Lang)</th>
+            <th>Sentence (Second Lang)</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -129,33 +125,76 @@ export default function Home() {
                 {editingId === item.id ? (
                   <input
                     type="text"
-                    value={editedRow.word}
-                    onChange={(e) => handleInputChange('word', e.target.value)}
+                    value={editedRow.wordFirstLang}
+                    onChange={(e) => handleInputChange('wordFirstLang', e.target.value)}
+                    style={{
+                      width: '280px',   // Increase the width of the input box
+                      height: '30px',   // Increase the height of the input box
+                      padding: '5px',   // Add some padding to the input box for better visibility
+                      fontSize: '16px', // Make the font size larger
+                      border: '1px solid #ccc', // Add a border for clarity
+                      borderRadius: '4px' // Optional: rounding corners
+                    }}
                   />
                 ) : (
-                  item.word
+                  item.wordFirstLang
                 )}
               </td>
               <td>
                 {editingId === item.id ? (
                   <input
                     type="text"
-                    value={editedRow.translation}
-                    onChange={(e) => handleInputChange('translation', e.target.value)}
+                    value={editedRow.sentenceFirstLang}
+                    onChange={(e) => handleInputChange('sentenceFirstLang', e.target.value)}
+                    style={{
+                      width: '450px',   // Increase the width of the input box
+                      height: '30px',   // Increase the height of the input box
+                      padding: '5px',   // Add some padding to the input box for better visibility
+                      fontSize: '16px', // Make the font size larger
+                      border: '1px solid #ccc', // Add a border for clarity
+                      borderRadius: '4px' // Optional: rounding corners
+                    }}
                   />
                 ) : (
-                  item.translation
+                  item.sentenceFirstLang
                 )}
               </td>
               <td>
                 {editingId === item.id ? (
                   <input
                     type="text"
-                    value={editedRow.example}
-                    onChange={(e) => handleInputChange('example', e.target.value)}
+                    value={editedRow.wordSecondLang}
+                    onChange={(e) => handleInputChange('wordSecondLang', e.target.value)}
+                    style={{
+                      width: '300px',   // Increase the width of the input box
+                      height: '30px',   // Increase the height of the input box
+                      padding: '5px',   // Add some padding to the input box for better visibility
+                      fontSize: '16px', // Make the font size larger
+                      border: '1px solid #ccc', // Add a border for clarity
+                      borderRadius: '4px' // Optional: rounding corners
+                    }}
                   />
                 ) : (
-                  item.example
+                  item.wordSecondLang
+                )}
+              </td>
+              <td>
+                {editingId === item.id ? (
+                  <input
+                    type="text"
+                    value={editedRow.sentenceSecondLang}
+                    onChange={(e) => handleInputChange('sentenceSecondLang', e.target.value)}
+                    style={{
+                      width: '450px',   // Increase the width of the input box
+                      height: '30px',   // Increase the height of the input box
+                      padding: '5px',   // Add some padding to the input box for better visibility
+                      fontSize: '16px', // Make the font size larger
+                      border: '1px solid #ccc', // Add a border for clarity
+                      borderRadius: '4px' // Optional: rounding corners
+                    }}
+                  />
+                ) : (
+                  item.sentenceSecondLang
                 )}
               </td>
               <td>
@@ -166,9 +205,10 @@ export default function Home() {
                     onClick={() =>
                       handleEditClick(
                         item.id,
-                        item.word,
-                        item.translation,
-                        item.example
+                        item.wordFirstLang,
+                        item.sentenceFirstLang,
+                        item.wordSecondLang,
+                        item.sentenceSecondLang
                       )
                     }
                   >
@@ -183,3 +223,4 @@ export default function Home() {
     </div>
   );
 }
+

@@ -1,72 +1,64 @@
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
-function loadJsonToRustofin(jsonFile, dbFile) {
+const dbFile = './pages/database/rustofin.db';
+const jsonFile = './pages/database/data.json';
+
+function loadJsonToSqlite(jsonFile, dbFile, tableName) {
     // Open SQLite database or create it if it doesn't exist
-    let db = new sqlite3.Database(dbFile, (err) => {
-        if (err) {
-            console.error('Error opening database:', err.message);
-        }
-    });
+    let db = new sqlite3.Database(dbFile);
 
     // Read JSON data
     let data = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
 
-    // Create table if it doesn't exist
+    // Define table structure
     let createTableQuery = `
-        CREATE TABLE IF NOT EXISTS rustofin (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            word TEXT,
-            translation TEXT,
-            example TEXT
+        CREATE TABLE IF NOT EXISTS ${tableName} (
+            id INTEGER PRIMARY KEY,
+            wordFirstLang TEXT,
+            sentenceFirstLang TEXT,
+            wordSecondLang TEXT,
+            sentenceSecondLang TEXT
         )
     `;
     db.run(createTableQuery, (err) => {
         if (err) {
-            console.error('Error creating table:', err.message);
+            console.error("Error creating table:", err.message);
             return;
         }
 
+        console.log("Table created or already exists.");
+
         // Prepare insert statement
-        let insertQuery = `INSERT INTO rustofin (word, translation, example) VALUES (?, ?, ?)`;
+        let insertQuery = `
+            INSERT INTO ${tableName} (id, wordFirstLang, sentenceFirstLang, wordSecondLang, sentenceSecondLang)
+            VALUES (?, ?, ?, ?, ?)
+        `;
         let stmt = db.prepare(insertQuery);
 
         // Insert data into table
         data.forEach(row => {
-            let word = row.wordFirstLang || '';
-            let translation = row.wordSecondLang || '';
-            let example = '';
-
-            if (row.sentenceFirstLang && row.sentenceSecondLang) {
-                example = `${row.sentenceFirstLang} - ${row.sentenceSecondLang}`;
-            }
-
-            stmt.run(word, translation, example, (err) => {
+            stmt.run(row.id, row.wordFirstLang, row.sentenceFirstLang, row.wordSecondLang, row.sentenceSecondLang, (err) => {
                 if (err) {
-                    console.error('Error inserting row:', err.message);
+                    console.error("Error inserting row:", err.message);
                 }
             });
         });
 
-        // Finalize statement and close database after all insertions are done
-        stmt.finalize((err) => {
-            if (err) {
-                console.error('Error finalizing statement:', err.message);
-            }
-            db.close((err) => {
-                if (err) {
-                    console.error('Error closing database:', err.message);
-                } else {
-                    console.log('Database operation completed successfully.');
-                }
+        // Finalize statement and close database
+        stmt.finalize(() => {
+            db.close(() => {
+                console.log("Database connection closed.");
             });
         });
     });
 }
 
 // Usage
-const jsonFile = './pages/database/data.json';  // Path to your JSON file
-const dbFile = './pages/database/rustofin.db';  // SQLite database file
+//const jsonFile = 'data.json';  
+// Path to your JSON file
+//const dbFile = 'rustofin.db';  
+// SQLite database file
+const tableName = 'rustofin';  // Desired table name in the database
 
-
-loadJsonToRustofin(jsonFile, dbFile);
+loadJsonToSqlite(jsonFile, dbFile, tableName);
